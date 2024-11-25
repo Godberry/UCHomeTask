@@ -11,56 +11,23 @@ namespace QuotesServer
 {
     internal class QuoteServer
     {
-        private ConcurrentDictionary<string, double> _quotes = new();
-        private TcpListener _listener;
-
-        public QuoteServer ()
+        private readonly QuoteGenerator quote_generator;
+        private readonly int port;
+        public QuoteServer (int _product_count, int port)
         {
-            InitializeQuotes (100); // 初始化 100 個商品
+            this.port = port;
+            quote_generator = new QuoteGenerator(_product_count);
         }
-
-        private void InitializeQuotes (int count)
+        public void Start()
         {
-            var random = new Random();
-            for (int i = 0; i < count; i++)
-            {
-                string symbol = $"Stock{i + 1}";
-                _quotes[symbol] = random.NextDouble () * 100;
-            }
+            // 產生報價
+            quote_generator.StartGenerating();
+
+            // 接聽client發送的事件
+            // udp server handler?? 或許處理heartbeat?
+
+            // 傳送報價的工作
+            // 從報價產生器那邊取得新增的報價，紀錄報價到Stock的history中，並發送封包給有註冊對應商品的client
         }
-
-        public async Task StartAsync (int port)
-        {
-            _listener = new TcpListener (IPAddress.Any, port);
-            _listener.Start ();
-            Console.WriteLine ("Server started. Waiting for clients...");
-
-            while (true)
-            {
-                var client = await _listener.AcceptTcpClientAsync();
-                Console.WriteLine ("Client connected.");
-                _ = Task.Run (() => HandleClientAsync (client));
-            }
-        }
-
-        private async Task HandleClientAsync (TcpClient client)
-        {
-            using NetworkStream stream = client.GetStream();
-            var random = new Random();
-
-            while (true)
-            {
-                foreach (var symbol in _quotes.Keys)
-                {
-                    double price = _quotes[symbol] + random.NextDouble();
-                    var quote = $"{symbol},{price:F2},{DateTime.Now:O}";
-                    byte[] data = Encoding.UTF8.GetBytes(quote + "\n");
-
-                    await stream.WriteAsync (data);
-                    await Task.Delay (10); // 控制發送頻率
-                }
-            }
-        }
-
     }
 }

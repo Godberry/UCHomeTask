@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace QuotesServer
 {
-    internal class Stock
+    internal class CStock
     {
+        public string StockName;
+        public ConcurrentBag<STradeDetail> TradeDetails = new ConcurrentBag<STradeDetail>();
     }
 }

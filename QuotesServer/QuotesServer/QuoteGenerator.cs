@@ -9,20 +9,21 @@ namespace QuotesServer
 {
     class QuoteGenerator
     {
-        private readonly ConcurrentDictionary<string, ConcurrentBag<STradeDetail>> trade_details = new();
+        private readonly Dictionary<string, ConcurrentQueue<STradeDetail>> trade_details = new();
         private readonly List<string> stock_list = new();
         private readonly Random random = new();
         private const int MAX_TRADE_COUNT = 101;
         private const int MIN_TRADE_COUNT = 0;
+        private ulong serial_no = 0;
 
         public QuoteGenerator (in int _product_count)
         {
             var stocks = Enumerable.Range(1, _product_count).Select(i => $"Stock{i}");
             stock_list.AddRange (stocks); // 將生成的商品清單加入到 stocks 中
 
-            foreach (var symbol in stock_list)
+            foreach (var stock in stock_list)
             {
-                trade_details[symbol] = new ConcurrentBag<STradeDetail>(); // 初始化每個商品成交回報list
+                trade_details[stock] = new ConcurrentQueue<STradeDetail>(); // 初始化每個商品成交回報list
             }
         }
 
@@ -38,7 +39,7 @@ namespace QuotesServer
                         for (int i = 0; i < counts; i++)
                         {
                             var detail = GenerateQuote(stock);
-                            trade_details[stock].Add (detail); 
+                            trade_details[stock].Enqueue (detail); 
                         }
                     }
                     await Task.Delay (intervalMilliseconds);
@@ -53,7 +54,8 @@ namespace QuotesServer
                 Stock = _stock,
                 Price = (decimal)Math.Round (random.NextDouble () * 100, 2), // 兩位小數的價格
                 Timestamp = DateTime.Now,
-                Volume = 1
+                Volume = 1,
+                SerialNo = serial_no++
             };
         }
     }
