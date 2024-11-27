@@ -9,7 +9,7 @@ namespace QuotesServer
 {
     class QuoteGenerator
     {
-        private readonly Dictionary<string, ConcurrentQueue<STradeDetail>> trade_details = new();
+        private readonly ConcurrentDictionary<string, ConcurrentQueue<STradeDetail>> trade_details = new();
         private readonly List<string> stock_list = new();
         private readonly Random random = new();
         private const int MAX_TRADE_COUNT = 101;
@@ -57,6 +57,33 @@ namespace QuotesServer
                 Volume = 1,
                 SerialNo = serial_no++
             };
+        }
+
+        public Dictionary<string, List<STradeDetail>> GetQuotes (int maxCount = 100)
+        {
+            var quotes = new Dictionary<string, List<STradeDetail>>();
+
+            foreach (var stock in stock_list)
+            {
+                if (trade_details.TryGetValue (stock, out var queue))
+                {
+                    List<STradeDetail> details = new List<STradeDetail> ();
+                    for (int i = 0; i < maxCount; i++)
+                    {
+                        if (queue.TryDequeue (out var detail))
+                        {
+                            details.Add (detail);
+                        }
+                        else
+                        {
+                            break; // 沒有更多報價
+                        }
+                    }
+                    quotes.Add (stock, details);
+                }
+            }
+
+            return quotes;
         }
     }
 }

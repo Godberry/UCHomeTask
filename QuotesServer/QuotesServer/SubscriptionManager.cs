@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,13 +11,13 @@ namespace QuotesServer
 {
     class SubscriptionManager
     {
-        private readonly ConcurrentDictionary<string, List<NetworkStream>> _subscriptions = new();
+        private readonly ConcurrentDictionary<string, List<IPEndPoint>> _subscriptions = new();
 
         // 客戶端訂閱商品
-        public void Subscribe (string symbol, NetworkStream stream)
+        public void Subscribe (string symbol, IPEndPoint stream)
         {
             _subscriptions.AddOrUpdate (symbol,
-                _ => new List<NetworkStream> { stream },
+                _ => new List<IPEndPoint> { stream },
                 (_, existingStreams) =>
                 {
                     existingStreams.Add (stream);
@@ -25,7 +26,7 @@ namespace QuotesServer
         }
 
         // 客戶端取消訂閱（可選）
-        public void Unsubscribe (string symbol, NetworkStream stream)
+        public void Unsubscribe (string symbol, IPEndPoint stream)
         {
             if (_subscriptions.TryGetValue (symbol, out var streams))
             {
@@ -34,25 +35,15 @@ namespace QuotesServer
                     _subscriptions.TryRemove (symbol, out _);
             }
         }
-
-        // 推送報價給訂閱者
-        public async Task NotifySubscribersAsync (string symbol, string quote)
+        // 取得有訂閱這檔股票的用戶
+        public List<IPEndPoint> GetSubscriber (string symbol)
         {
             if (_subscriptions.TryGetValue (symbol, out var streams))
             {
-                var data = Encoding.UTF8.GetBytes(quote + "\n");
-                foreach (var stream in streams)
-                {
-                    try
-                    {
-                        await stream.WriteAsync (data); // 主動推送給客戶端
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine ($"Failed to notify client: {ex.Message}");
-                    }
-                }
+                return streams;
             }
+            
+            return new List<IPEndPoint> ();    
         }
     }
 }

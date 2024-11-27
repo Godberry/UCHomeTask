@@ -4,20 +4,13 @@ using System.Text;
 
 class ClientTester
 {
-    public static void Main (string[] args)
+    static async Task Main (string[] args)
     {
-        var client = new TcpClient();
-        client.Connect ("127.0.0.1", 9000); // 連接本機 Server
+        var networkHandler = new UdpNetworkHandler();
+        var client = new QuoteClient(networkHandler);
 
-        using NetworkStream stream = client.GetStream();
-        byte[] buffer = new byte[1024];
-        int bytesRead;
-
-        Console.WriteLine ("Connected to server. Receiving data...");
-        while ((bytesRead = stream.Read (buffer, 0, buffer.Length)) > 0)
-        {
-            string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-            Console.WriteLine (message);
-        }
+        await client.ConnectAsync ("127.0.0.1", 5000);
+        await client.SubscribeToStocks (new List<string> { "Stock1", "Stock2" });
+        await client.StartReceiving ();
     }
 }
