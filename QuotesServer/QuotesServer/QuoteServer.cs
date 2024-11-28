@@ -62,6 +62,11 @@ namespace QuotesServer
                         Console.WriteLine ($"Client {clientEndpoint} subscribed to: {string.Join (", ", request.Stocks)}");
                     }
                 }
+                catch (SocketException ex) when (ex.SocketErrorCode == SocketError.ConnectionReset)
+                {
+                    Console.WriteLine ("Client forcibly closed the connection. Removing from subscriptions...");
+                    subscriptionManager.RemoveClient (networkHandler.GetRemoteEndpoint ());
+                }
                 catch (Exception ex)
                 {
                     Console.WriteLine ($"Error receiving client request: {ex.Message}");

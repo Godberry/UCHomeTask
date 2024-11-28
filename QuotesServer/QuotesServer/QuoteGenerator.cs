@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace QuotesServer
@@ -23,28 +24,49 @@ namespace QuotesServer
 
             foreach (var stock in stock_list)
             {
-                trade_details[stock] = new ConcurrentQueue<STradeDetail>(); // 初始化每個商品成交回報list
+                trade_details.TryAdd (stock, new ConcurrentQueue<STradeDetail> ());
             }
         }
 
         public void StartGenerating (int intervalMilliseconds = 1000)
         {
-            Task.Run (async () =>
+            Random random = new Random();
+
+            SemaphoreSlim semaphore = new SemaphoreSlim(100);
+
+            foreach (var stock in stock_list)
             {
-                while (true)
+                Task.Run (async () =>
                 {
-                    foreach (var stock in stock_list)
+                    await semaphore.WaitAsync ();
+                    while (true)
                     {
-                        int counts = random.Next(MIN_TRADE_COUNT, MAX_TRADE_COUNT);
-                        for (int i = 0; i < counts; i++)
+                        // 隨機生成該秒的報價數量
+                        int targetCount = random.Next(MIN_TRADE_COUNT, MAX_TRADE_COUNT); // 0~100
+                        if (targetCount > 0)
                         {
-                            var detail = GenerateQuote(stock);
-                            trade_details[stock].Enqueue (detail); 
+                            // 計算每次報價的間隔時間 (ms)
+                            int delayPerTrade = intervalMilliseconds / targetCount;
+
+                            for (int i = 0; i < targetCount; i++)
+                            {
+                                // 生成報價
+                                var detail = GenerateQuote(stock);
+
+                                trade_details[stock].Enqueue (detail);
+
+                                // 等待間隔時間
+                                await Task.Delay (delayPerTrade);
+                            }
+                        }
+                        else
+                        {
+                            // 如果當秒無需報價，直接等待整秒
+                            await Task.Delay (intervalMilliseconds);
                         }
                     }
-                    await Task.Delay (intervalMilliseconds);
-                }
-            });
+                });
+            }
         }
 
         private STradeDetail GenerateQuote (string _stock)
@@ -63,22 +85,26 @@ namespace QuotesServer
         {
             var quotes = new Dictionary<string, List<STradeDetail>>();
 
-            foreach (var stock in stock_list)
+            foreach (var kvp in trade_details) // 直接遍歷 trade_details，僅處理有報價的商品
             {
-                if (trade_details.TryGetValue (stock, out var queue))
+                var stock = kvp.Key;
+                var queue = kvp.Value;
+
+                List<STradeDetail> details = new List<STradeDetail>();
+                for (int i = 0; i < maxCount; i++)
                 {
-                    List<STradeDetail> details = new List<STradeDetail> ();
-                    for (int i = 0; i < maxCount; i++)
+                    if (queue.TryDequeue (out var detail))
                     {
-                        if (queue.TryDequeue (out var detail))
-                        {
-                            details.Add (detail);
-                        }
-                        else
-                        {
-                            break; // 沒有更多報價
-                        }
+                        details.Add (detail);
                     }
+                    else
+                    {
+                        break; // 該商品無更多報價
+                    }
+                }
+
+                if (details.Count > 0) // 僅加入有報價的商品
+                {
                     quotes.Add (stock, details);
                 }
             }
