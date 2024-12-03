@@ -93,7 +93,7 @@ namespace QuotesServer
                         }
                     }
 
-                    await Task.Delay (1); // 每 10 毫秒推送一次
+                    await Task.Delay (1);
                 }
                 catch (Exception ex)
                 {

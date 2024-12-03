@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,6 +14,7 @@ namespace QuotesServer
     {
         private readonly ConcurrentDictionary<string, ConcurrentQueue<STradeDetail>> trade_details = new();
         private readonly List<string> stock_list = new();
+        private readonly Dictionary<string, decimal> basePrice = new();
         private readonly Random random = new();
         private const int MAX_TRADE_COUNT = 101;
         private const int MIN_TRADE_COUNT = 0;
@@ -25,6 +28,7 @@ namespace QuotesServer
             foreach (var stock in stock_list)
             {
                 trade_details.TryAdd (stock, new ConcurrentQueue<STradeDetail> ());
+                basePrice.Add (stock, random.Next (0, 100));
             }
         }
 
@@ -32,13 +36,10 @@ namespace QuotesServer
         {
             Random random = new Random();
 
-            SemaphoreSlim semaphore = new SemaphoreSlim(100);
-
             foreach (var stock in stock_list)
             {
                 Task.Run (async () =>
                 {
-                    await semaphore.WaitAsync ();
                     while (true)
                     {
                         // 隨機生成該秒的報價數量
@@ -71,13 +72,31 @@ namespace QuotesServer
 
         private STradeDetail GenerateQuote (string _stock)
         {
+            // 模擬價格變動
+            decimal basePrice = this.basePrice[_stock];
+            decimal priceChange = Math.Round((decimal)(random.NextDouble() * 2 - 1), 2); // 隨機變動 [-1, 1]
+
+            basePrice = Math.Max (1, basePrice + priceChange); // 價格不可低於 1
+            this.basePrice[_stock] = basePrice; // 同步更新基準價格
+
+            // 模擬買賣價差
+            decimal spread = Math.Round((decimal)random.NextDouble() * 0.5m, 2); // 價差 [0, 0.5]
+            decimal askPrice = Math.Round(basePrice + spread, 2);
+            decimal bidPrice = Math.Round(basePrice - spread, 2);
+
+            // 模擬成交量
+            int volume = random.Next(1, 100); // 隨機成交量 [1, 100]
+
+            // 返回生成的報價
             return new STradeDetail
             {
                 Stock = _stock,
-                Price = (decimal)Math.Round (random.NextDouble () * 100, 2), // 兩位小數的價格
-                Timestamp = DateTime.Now,
-                Volume = 1,
-                SerialNo = serial_no++
+                Price = basePrice,
+                AskPrice = askPrice,
+                BidPrice = bidPrice,
+                Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds (),
+                Volume = volume,
+                SerialNo = Interlocked.Increment (ref serial_no)
             };
         }
 
