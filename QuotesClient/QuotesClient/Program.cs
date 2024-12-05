@@ -13,16 +13,9 @@ namespace QuotesClient
             ApplicationConfiguration.Initialize();
 
             QuoteForm quoteForm = new QuoteForm();
-
-            Task.Run (async () =>
-            {
-                var networkHandler = new UdpNetworkHandler();
-                var client = new QuoteClient(networkHandler, quoteForm);
-
-                await client.ConnectAsync ("127.0.0.1", 5000);
-                await client.SubscribeToStocks (new List<string> { "Stock1", "Stock2", "Stock3" });
-                await client.StartReceiving ();
-            });
+            var client = new QuoteClient(quoteForm);
+            
+            _ = client.StartAsync ();
 
             Application.Run(quoteForm);
         }

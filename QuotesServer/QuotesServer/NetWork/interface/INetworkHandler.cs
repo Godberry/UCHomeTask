@@ -11,7 +11,7 @@ namespace QuotesServer
     {
         Task InitializeAsync (string address, int port); // 初始化網路層
         Task SendAsync (byte[] data, IPEndPoint remoteEndpoint); // 發送數據
-        Task<byte[]> ReceiveAsync (); // 接收數據
+        Task<(byte[], IPEndPoint)> ReceiveAsync (); // 接收數據
         IPEndPoint GetRemoteEndpoint (); // 獲取最後一個接收數據的客戶端地址
         Task CloseAsync (); // 關閉網路層
     }

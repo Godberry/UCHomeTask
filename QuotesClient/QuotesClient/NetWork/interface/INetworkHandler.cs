@@ -13,9 +13,3 @@ public interface INetworkHandler
     IPEndPoint GetRemoteEndpoint (); // 獲取最後一個接收數據的客戶端地址
     Task CloseAsync (); // 關閉網路層
 }
-
-class ClientRequest
-{
-    public string Type { get; set; } // "Subscribe"
-    public List<string> Stocks { get; set; }
-}

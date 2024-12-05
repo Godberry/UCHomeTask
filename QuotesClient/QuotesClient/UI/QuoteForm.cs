@@ -14,6 +14,7 @@ namespace QuotesClient
         private List<Quotes> dataList = new List<Quotes>(); // 儲存最新報價
         private HashSet<int> dirtyRows = new HashSet<int>(); // 記錄需要更新的行索引
         private Timer updateTimer;
+        public event Action<string> OnAddProductBtnClick;
 
         public QuoteForm ()
         {
@@ -64,10 +65,12 @@ namespace QuotesClient
                     case 1: e.Value = quote.Price; break;
                     case 2: e.Value = quote.AskPrice; break;
                     case 3: e.Value = quote.BidPrice; break;
-                    case 4: e.Value = quote.Volume; break;
-                    case 5: e.Value = quote.TradeTime; break;
-                    case 6: e.Value = quote.Latency; break;
-                    default: e.Value = null; break; 
+                    case 4: e.Value = quote.HighestPrice; break;
+                    case 5: e.Value = quote.LowestPrice; break;
+                    case 6: e.Value = quote.Volume; break;
+                    case 7: e.Value = quote.TradeTime; break;
+                    case 8: e.Value = quote.Latency; break;
+                    default: e.Value = null; break;
                 }
             }
         }
@@ -92,13 +95,26 @@ namespace QuotesClient
                 return;
             }
 
-            if (index < 0 || index >= dataList.Count) return;
+            if (index < 0)
+            {
+                return;
+            }
+
+            while (index >= dataList.Count)
+            {
+                AddQuotes (null);
+            }
 
             dataList[index] = updatedQuote;
             lock (dirtyRows)
             {
                 dirtyRows.Add (index); // 記錄需要更新的行
             }
+        }
+
+        private void button1_Click (object sender, EventArgs e)
+        {
+            OnAddProductBtnClick?.Invoke (stockTextBox.Text);
         }
     }
 }

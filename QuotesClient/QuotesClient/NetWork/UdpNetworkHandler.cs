@@ -5,12 +5,10 @@ using System.Threading.Tasks;
 public class UdpNetworkHandler : INetworkHandler
 {
     private UdpClient udpClient;
-    private IPEndPoint serverEndpoint;
 
     public async Task InitializeAsync (string address, int serverPort)
     {
-        udpClient = new UdpClient ();
-        serverEndpoint = new IPEndPoint (IPAddress.Parse (address), serverPort);
+        udpClient = new UdpClient (serverPort);
         await Task.CompletedTask;
     }
 
@@ -27,7 +25,7 @@ public class UdpNetworkHandler : INetworkHandler
 
     public IPEndPoint GetRemoteEndpoint ()
     {
-        return serverEndpoint;
+        return null;
     }
 
     public async Task CloseAsync ()

@@ -24,11 +24,11 @@ namespace QuotesServer
             await udpClient.SendAsync (data, data.Length, remoteEndpoint);
         }
 
-        public async Task<byte[]> ReceiveAsync ()
+        public async Task<(byte[], IPEndPoint)> ReceiveAsync ()
         {
             var result = await udpClient.ReceiveAsync();
             lastRemoteEndpoint = result.RemoteEndPoint; // 記錄最近的客戶端端點
-            return result.Buffer;
+            return (result.Buffer, result.RemoteEndPoint);
         }
 
         public IPEndPoint GetRemoteEndpoint ()

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "QuotesServer": {
+      "commandName": "Project",
+      "commandLineArgs": "1000"
+    }
+  }
+}

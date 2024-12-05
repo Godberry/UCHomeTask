@@ -10,9 +10,21 @@ class Program
 {
     public static async Task Main (string[] args)
     {
-        var networkHandler = new UdpNetworkHandler(); // 可切換為其他實現
-        var quoteGenerator = new QuoteGenerator(100); // 100 個商品
-        var server = new QuoteServer(networkHandler, quoteGenerator);
+        // 預設商品數量
+        int productCount = 100;
+
+        // 檢查是否有傳入商品數量參數
+        if (args.Length > 0 && int.TryParse (args[0], out var count) && count > 0)
+        {
+            productCount = count;
+        }
+        else
+        {
+            Console.WriteLine ("使用預設商品數量100");
+        }
+
+        var quoteGenerator = new QuoteGenerator(productCount);
+        var server = new QuoteServer(quoteGenerator);
 
         await server.StartAsync ("127.0.0.1", 5000);
     }

@@ -3,9 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace QuotesClient
+namespace QuotesServer
 {
     public class Quotes
     {
@@ -18,6 +19,7 @@ namespace QuotesClient
         public ulong SerialNo { get; set; }         // 序列號
         public decimal HighestPrice { get; set; }   // 最高價
         public decimal LowestPrice { get; set; }    // 最低價
+        [JsonIgnore]
         public string TradeTime
         {
             get
@@ -26,6 +28,7 @@ namespace QuotesClient
                 return DateTimeOffset.FromUnixTimeSeconds (unixTimestampInSeconds).ToLocalTime ().ToString ("yyyy-MM-dd HH:mm:ss");
             }
         }
+        [JsonIgnore]
         public long Latency
         {
             get
