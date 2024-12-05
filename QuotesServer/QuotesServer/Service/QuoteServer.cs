@@ -29,14 +29,13 @@ namespace QuotesServer
             await tcpNetworkHandler.InitializeAsync (address, port);
             tcpNetworkHandler.OnDataReceived = HandleClientTCPMessage;
 
+            // 接聽client的tcp消息
             _ = tcpNetworkHandler.AcceptClientsAsync();
 
             // 開始產生報價
             quoteGenerator.StartGenerating ();
 
-            // 接收客戶端請求
-
-            // 推送報價
+            // 推送報價(udp)
             await PushQuotes ();
         }
         public void HandleClientTCPMessage (byte[] data, IPEndPoint clientEndpoint)
@@ -55,6 +54,7 @@ namespace QuotesServer
                             // 註冊商品
                             if(subscriptionManager.Subscribe (stock, clientEndpoint))
                             {
+                                // 註冊成功視為dirty狀態，回補過往的報價資訊
                                 AddClientQuoteStatus (stock, clientEndpoint);
                             }
                         }
@@ -87,6 +87,12 @@ namespace QuotesServer
                     {
                         var stock = tickers.Key;
                         var subscribers = subscriptionManager.GetSubscriber(stock);
+                        // 沒人訂閱就下一檔
+                        if (subscribers.Count == 0)
+                        {
+                            continue;
+                        }
+
                         ReceiveTickersMessage package = new(tickers.Key, tickers.Value);
                         string message =JsonSerializer.Serialize (package);
                         var data = Encoding.UTF8.GetBytes(message);
@@ -111,7 +117,7 @@ namespace QuotesServer
             {
                 Quotes quotes = new Quotes();
                 quoteGenerator.GetQuotes (stock, out quotes);
-                SubscribeStocksSuccessMessage newStockPackage = new SubscribeStocksSuccessMessage(quotes);
+                UpdateQuotesMessage newStockPackage = new UpdateQuotesMessage(quotes);
                 string messageNewStock = JsonSerializer.Serialize (newStockPackage);
                 var dataNewStock = Encoding.UTF8.GetBytes(messageNewStock);
                 await tcpNetworkHandler.SendAsync (dataNewStock, subscriber);

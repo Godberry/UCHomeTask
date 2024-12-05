@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -32,6 +33,7 @@ namespace QuotesClient
             #endregion
             #region ui相關
             quoteForm.OnAddProductBtnClick += QuoteForm_OnAddProductBtnClick;
+            quoteFactory.OnQuoteUpdate += UpdateQuote;
             #endregion
         }
 
@@ -66,7 +68,7 @@ namespace QuotesClient
 
                     switch (request)
                     {
-                        case SubscribeStocksSuccessMessage subscribeSuccess:
+                        case UpdateQuotesMessage subscribeSuccess:
                             quoteFactory.AddQuotes (subscribeSuccess.quotes);
                             break;
                         default:
@@ -109,15 +111,19 @@ namespace QuotesClient
                 }
             }
 
-            Quotes quote = quoteFactory.GetQuotes (stockName);
-            int stockIndex = quoteFactory.GetStockIndex(stockName);
-
-            quoteForm.UpdateQuotes (stockIndex, quote);
+            UpdateQuote (stockName);
 
             if (dirty)
             {
                 _ = RequestQuotesDirtyAsync (stockName);
             }
+        }
+        private void UpdateQuote(string stock)
+        {
+            Quotes quote = quoteFactory.GetQuotes (stock);
+            int stockIndex = quoteFactory.GetStockIndex(stock);
+
+            quoteForm.UpdateQuotes (stockIndex, quote);
         }
     }
 }

@@ -119,6 +119,7 @@ namespace QuotesServer
                     if (queue.TryDequeue (out var detail))
                     {
                         details.Add (detail);
+                        // 準備被推出去給client的ticker在這邊才會被真正加到報價中
                         PushTickers (stock, detail);
                     }
                     else

@@ -28,7 +28,7 @@ namespace QuotesClient
 
             return type switch
             {
-                "SubscribeStocksSuccessMessage" => JsonSerializer.Deserialize<SubscribeStocksSuccessMessage> (json),
+                "UpdateQuotes" => JsonSerializer.Deserialize<UpdateQuotesMessage> (json),
                 _ => throw new InvalidOperationException ($"未知的消息類型: {type}")
             };
         }

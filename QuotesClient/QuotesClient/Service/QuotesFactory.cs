@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,15 +9,17 @@ namespace QuotesClient
 {
     internal class QuotesFactory
     {
-        private Dictionary<string, Quotes> m_all_quotes = new Dictionary<string, Quotes>();
+        private ConcurrentDictionary<string, Quotes> allQuotes = new ConcurrentDictionary<string, Quotes>();
+        public Action<string> OnQuoteUpdate;
         public void AddQuotes (Quotes quotes)
         {
-            m_all_quotes.TryAdd (quotes.Stock, quotes);
+            allQuotes.AddOrUpdate (quotes.Stock, quotes, (key, existing) => quotes);
+            OnQuoteUpdate?.Invoke (quotes.Stock);
         }
-        public bool PushTickers (in string stockName, in STradeDetail _detail)
+        public bool PushTickers (in string stockName, in STradeDetail _detail, bool update = false)
         {
             bool result = true;
-            if (!m_all_quotes.TryGetValue (stockName, out Quotes quotes))
+            if (!allQuotes.TryGetValue (stockName, out Quotes quotes))
             {
                 return result;
             }
@@ -38,17 +41,22 @@ namespace QuotesClient
                 return false;
             }
 
+            if (update)
+            {
+                OnQuoteUpdate?.Invoke (quotes.Stock);
+            }
+
             return result;
         }
 
         public Quotes GetQuotes (string _stock)
         {
-            return m_all_quotes[_stock];
+            return allQuotes[_stock];
         }
 
         public int GetStockIndex(string _stock)
         {
-            return m_all_quotes.Keys.ToList().IndexOf(_stock);
+            return allQuotes.Keys.ToList().IndexOf(_stock);
         }
     }
 }

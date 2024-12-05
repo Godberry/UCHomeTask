@@ -17,11 +17,11 @@ namespace QuotesServer
             this.tickers = tickers;
         }
     }
-    public class SubscribeStocksSuccessMessage : NetWorkMessage
+    public class UpdateQuotesMessage : NetWorkMessage
     {
         public Quotes quotes { get; set; }
-        public SubscribeStocksSuccessMessage (Quotes quotes)
-            : base ("SubscribeStocksSuccessMessage")
+        public UpdateQuotesMessage (Quotes quotes)
+            : base ("UpdateQuotes")
         {
             this.quotes = quotes;
         }
