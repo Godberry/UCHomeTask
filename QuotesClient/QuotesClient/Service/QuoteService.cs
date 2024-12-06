@@ -29,6 +29,7 @@ namespace QuotesClient
         public void Initialize ()
         {
             #region server相關
+            // 暫時無用，保留ticker機制
             OnTickerReceived += QuoteService_OnTickerReceived;
             #endregion
             #region ui相關
@@ -49,6 +50,7 @@ namespace QuotesClient
             await tcpNetworkHandler.SendAsync (Encoding.UTF8.GetBytes (message), tcpNetworkHandler.GetRemoteEndpoint());
         }
 
+        // 暫無用處，保留未來需要回補ticker時做修改
         public async Task RequestQuotesDirtyAsync (string stock)
         {
             RequestStockDirty subscribeStock = new RequestStockDirty(stock);
@@ -68,9 +70,6 @@ namespace QuotesClient
 
                     switch (request)
                     {
-                        case UpdateQuotesMessage subscribeSuccess:
-                            quoteFactory.AddQuotes (subscribeSuccess.quotes);
-                            break;
                         default:
                             Console.WriteLine ("未知消息類型");
                             break;
@@ -89,10 +88,11 @@ namespace QuotesClient
                 var data = await udpNetworkHandler.ReceiveAsync();
                 try
                 {
-                    var details = JsonSerializer.Deserialize<ReceiveTickersMessage>(Encoding.UTF8.GetString(data));
-                    if (details == null) continue;
-
-                    OnTickerReceived?.Invoke (details.stokName, details.tickers);
+                    var updateQuotes = JsonSerializer.Deserialize<UpdateQuotesMessage>(Encoding.UTF8.GetString(data));
+                    if (updateQuotes != null)
+                    {
+                        quoteFactory.AddQuotes (updateQuotes.quotes);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -100,6 +100,8 @@ namespace QuotesClient
                 }
             }
         }
+
+        // 暫無使用，保留ticker機制
         private void QuoteService_OnTickerReceived (string stockName, List<STradeDetail> tickers)
         {
             bool dirty = false;

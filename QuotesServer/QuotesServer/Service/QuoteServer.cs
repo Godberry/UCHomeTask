@@ -52,16 +52,12 @@ namespace QuotesServer
                         foreach (var stock in subscribeStockMessage.stocks)
                         {
                             // 註冊商品
-                            if(subscriptionManager.Subscribe (stock, clientEndpoint))
-                            {
-                                // 註冊成功視為dirty狀態，回補過往的報價資訊
-                                AddClientQuoteStatus (stock, clientEndpoint);
-                            }
+                            subscriptionManager.Subscribe (stock, clientEndpoint);
                         }
 
                         Console.WriteLine ($"Client {clientEndpoint} subscribed to: {string.Join (", ", subscribeStockMessage.stocks)}");
                         break;
-                    case RequestStockDirty requestStockDirty:
+                    case RequestStockDirty requestStockDirty:       // 暫無使用，保留ticker回補機制做修改
                         AddClientQuoteStatus (requestStockDirty.stocks, clientEndpoint);
                         break;
                     default:
@@ -93,13 +89,14 @@ namespace QuotesServer
                             continue;
                         }
 
-                        ReceiveTickersMessage package = new(tickers.Key, tickers.Value);
-                        string message =JsonSerializer.Serialize (package);
-                        var data = Encoding.UTF8.GetBytes(message);
+                        Quotes quotes = new Quotes();
+                        quoteGenerator.GetQuotes (stock, out quotes);
+                        UpdateQuotesMessage newStockPackage = new UpdateQuotesMessage(quotes);
+                        string messageNewStock = JsonSerializer.Serialize (newStockPackage);
+                        var dataNewStock = Encoding.UTF8.GetBytes(messageNewStock);
                         foreach (var subscriber in subscribers)
                         {
-                            await ProcClientQuoteDirty (stock, subscriber);
-                            await udpNetworkHandler.SendAsync (data, subscriber);
+                            await udpNetworkHandler.SendAsync (dataNewStock, subscriber);
                         }
                     }
 
@@ -111,6 +108,7 @@ namespace QuotesServer
                 }
             }
         }
+        #region 暫無使用，保留ticker機制日後可做修改
         private async Task ProcClientQuoteDirty (string stock, IPEndPoint subscriber)
         {
             if (IsDirtyStock (stock, subscriber))
@@ -124,6 +122,7 @@ namespace QuotesServer
                 RemoveClientQuotesStatus (stock, subscriber);
             }
         }
+        
         private void AddClientQuoteStatus (string symbol, IPEndPoint clientEndpoint)
         {
             clientQuoteStatus.AddOrUpdate (
@@ -145,5 +144,6 @@ namespace QuotesServer
         {
             return clientQuoteStatus.TryGetValue (clientEndpoint, out var newStocks) && newStocks.Contains (stock);
         }
-    }   
+        #endregion
+    }
 }

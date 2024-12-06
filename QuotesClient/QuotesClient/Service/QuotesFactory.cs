@@ -16,6 +16,8 @@ namespace QuotesClient
             allQuotes.AddOrUpdate (quotes.Stock, quotes, (key, existing) => quotes);
             OnQuoteUpdate?.Invoke (quotes.Stock);
         }
+
+        // 暫無使用，保留ticker機制
         public bool PushTickers (in string stockName, in STradeDetail _detail, bool update = false)
         {
             bool result = true;
