@@ -26,57 +26,57 @@
         ///  Required method for Designer support - do not modify
         ///  the contents of this method with the code editor.
         /// </summary>
-        private void InitializeComponent ()
+        private void InitializeComponent()
         {
-            dataGridView1 = new DataGridView ();
-            stockTextBox = new TextBox ();
-            label1 = new Label ();
-            button1 = new Button ();
-            Stock = new DataGridViewTextBoxColumn ();
-            Price = new DataGridViewTextBoxColumn ();
-            AskPrice = new DataGridViewTextBoxColumn ();
-            BidPrice = new DataGridViewTextBoxColumn ();
-            HighPrice = new DataGridViewTextBoxColumn ();
-            LowPrice = new DataGridViewTextBoxColumn ();
-            Volumn = new DataGridViewTextBoxColumn ();
-            Date = new DataGridViewTextBoxColumn ();
-            test = new DataGridViewTextBoxColumn ();
-            Delete = new DataGridViewButtonColumn ();
-            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit ();
-            SuspendLayout ();
+            dataGridView1 = new DataGridView();
+            stockTextBox = new TextBox();
+            label1 = new Label();
+            button1 = new Button();
+            Stock = new DataGridViewTextBoxColumn();
+            Price = new DataGridViewTextBoxColumn();
+            AskPrice = new DataGridViewTextBoxColumn();
+            BidPrice = new DataGridViewTextBoxColumn();
+            HighPrice = new DataGridViewTextBoxColumn();
+            LowPrice = new DataGridViewTextBoxColumn();
+            Volumn = new DataGridViewTextBoxColumn();
+            Date = new DataGridViewTextBoxColumn();
+            test = new DataGridViewTextBoxColumn();
+            Delete = new DataGridViewButtonColumn();
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
+            SuspendLayout();
             // 
             // dataGridView1
             // 
             dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView1.Columns.AddRange (new DataGridViewColumn[] { Stock, Price, AskPrice, BidPrice, HighPrice, LowPrice, Volumn, Date, test, Delete });
-            dataGridView1.Location = new Point (12, 12);
+            dataGridView1.Columns.AddRange(new DataGridViewColumn[] { Stock, Price, AskPrice, BidPrice, HighPrice, LowPrice, Volumn, Date, test, Delete });
+            dataGridView1.Location = new Point(12, 12);
             dataGridView1.MultiSelect = false;
             dataGridView1.Name = "dataGridView1";
             dataGridView1.ReadOnly = true;
-            dataGridView1.Size = new Size (743, 426);
+            dataGridView1.Size = new Size(763, 426);
             dataGridView1.TabIndex = 0;
             // 
             // stockTextBox
             // 
-            stockTextBox.Location = new Point (801, 13);
+            stockTextBox.Location = new Point(821, 14);
             stockTextBox.Name = "stockTextBox";
-            stockTextBox.Size = new Size (106, 23);
+            stockTextBox.Size = new Size(106, 23);
             stockTextBox.TabIndex = 1;
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point (761, 16);
+            label1.Location = new Point(781, 17);
             label1.Name = "label1";
-            label1.Size = new Size (34, 15);
+            label1.Size = new Size(34, 15);
             label1.TabIndex = 2;
             label1.Text = "商品:";
             // 
             // button1
             // 
-            button1.Location = new Point (761, 42);
+            button1.Location = new Point(781, 43);
             button1.Name = "button1";
-            button1.Size = new Size (154, 23);
+            button1.Size = new Size(154, 23);
             button1.TabIndex = 3;
             button1.Text = "新增";
             button1.UseVisualStyleBackColor = true;
@@ -139,10 +139,10 @@
             // 
             // test
             // 
-            test.HeaderText = "延遲";
+            test.HeaderText = "延遲(ms)";
             test.Name = "test";
             test.ReadOnly = true;
-            test.Width = 60;
+            test.Width = 80;
             // 
             // Delete
             // 
@@ -156,18 +156,18 @@
             // 
             // QuoteForm
             // 
-            AutoScaleDimensions = new SizeF (7F, 15F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size (921, 450);
-            Controls.Add (button1);
-            Controls.Add (label1);
-            Controls.Add (stockTextBox);
-            Controls.Add (dataGridView1);
+            ClientSize = new Size(939, 450);
+            Controls.Add(button1);
+            Controls.Add(label1);
+            Controls.Add(stockTextBox);
+            Controls.Add(dataGridView1);
             Name = "QuoteForm";
             Text = "Form1";
-            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit ();
-            ResumeLayout (false);
-            PerformLayout ();
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion

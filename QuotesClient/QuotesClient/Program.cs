@@ -8,16 +8,23 @@ namespace QuotesClient
         [STAThread]
         static void Main()
         {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
-            ApplicationConfiguration.Initialize();
+            try
+            {
+                // To customize application configuration such as set high DPI settings or default font,
+                // see https://aka.ms/applicationconfiguration.
+                ApplicationConfiguration.Initialize();
 
-            QuoteForm quoteForm = new QuoteForm();
-            var client = new QuoteClient(quoteForm);
-            
-            _ = client.StartAsync ();
+                QuoteForm quoteForm = new QuoteForm();
+                var client = new QuoteClient(quoteForm);
 
-            Application.Run(quoteForm);
+                _ = client.StartAsync();
+
+                Application.Run(quoteForm);
+            }
+            catch (Exception ex)
+            {
+                File.WriteAllText("error.log", ex.ToString());
+            }
         }
     }
 }
